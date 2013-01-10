@@ -50,6 +50,7 @@ class CompressionTester(object):
         messages.append(('req', req, req[':host']))
         messages.append(('res', res, req[':host']))
     self.ttls = self.process_messages(messages)
+    self.output("%i connections simulated to different hosts\n" % (len(self.host_compressors.keys())))
     for msg_type in self.msg_types:
       self.print_results(self.ttls.get(msg_type, {}), msg_type, True)
     if self.options.tsv:
