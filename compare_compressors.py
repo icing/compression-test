@@ -36,7 +36,7 @@ class CompressionTester(object):
     self.ttls = None
     self.lname = 0  # longest processor name
     self.options, self.args = self.parse_options()
-    self.codec_processors = self.get_compressors()
+    self.codec_modules, self.codec_params, self.host_compressors = self.get_compressor_modules()
     self.run()
 
       
@@ -106,7 +106,7 @@ class CompressionTester(object):
     """
     procs = [
       (name, proc[self.msg_types.index(message_type)]) for name, proc in \
-       self.codec_processors.items()
+       self.get_compressors_for(host).items()
     ]
     results = {"_message_type": message_type}
     for name, processor in procs:
@@ -228,11 +228,14 @@ class CompressionTester(object):
       tfh.close()
 
 
-  def get_compressors(self):
+  def get_compressor_modules(self):
     """
-    Get a hash of codec names to processors.
-    """
-    codec_processors = {}
+      Get a hash of codec names to modules.
+      Get a hash of codec names to codec params.
+      """
+    codec_modules = {}
+    codec_params = {}
+    host_compressors = {}
     for codec in self.options.codec:
       if "=" in codec:
         module_name, param_str = codec.split("=", 1)
@@ -244,12 +247,25 @@ class CompressionTester(object):
         params = []
       if len(module_name) > self.lname:
         self.lname = len(module_name)
-      module = import_module("compressor.%s" % module_name)
-      codec_processors[module_name] = ( # same order as self.msg_types
-        module.Processor(self.options, True, params),
-        module.Processor(self.options, False, params)
-      )
-    return codec_processors
+      codec_modules[module_name] = import_module("compressor.%s" % module_name)
+      codec_params[module_name] = params
+    return codec_modules, codec_params, host_compressors
+  
+  def get_compressors_for(self, host):
+    """
+      Get a hash of codec names to processors for a certain host.
+      """
+    if not host in self.host_compressors:
+      print 'Init new connection to ' + host
+      compressors = {}
+      for name, module in self.codec_modules.items():
+        params = self.codec_params[name]
+        compressors[name] = ( # same order as self.msg_types
+          module.Processor(self.options, True, params),
+          module.Processor(self.options, False, params)
+        )
+      self.host_compressors[host] = compressors
+    return self.host_compressors[host]
 
   @staticmethod
   def parse_options():
