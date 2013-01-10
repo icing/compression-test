@@ -256,7 +256,7 @@ class CompressionTester(object):
       Get a hash of codec names to processors for a certain host.
       """
     if not host in self.host_compressors:
-      print 'Init new connection to ' + host
+      #print 'Init new connection to ' + host
       compressors = {}
       for name, module in self.codec_modules.items():
         params = self.codec_params[name]
