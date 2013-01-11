@@ -145,7 +145,7 @@ class CompressionTester(object):
           result['ratio'] = 1.0 * result['size'] / baseline_size
 
     if self.options.tsv:
-      self.tsv_results(results)
+      self.tsv_results(results, host)
 
     if self.options.verbose >= 2 and not self.options.tsv:
       self.print_results(results, message_type)
@@ -196,7 +196,7 @@ class CompressionTester(object):
       self.output("-" * 80 + "\n")
         
 
-  def tsv_results(self, results):
+  def tsv_results(self, results, host):
     """
     Store TSV; takes a record number and a results object.
     """
@@ -208,10 +208,10 @@ class CompressionTester(object):
     message_type = results["_message_type"]
     
     if len(self.tsv_out[message_type]) == 0:
-      self.tsv_out[message_type].append("num\t" + "\t".join(codecs) + "\n")
+      self.tsv_out[message_type].append("num\t" + "\t".join(codecs) + "\thost\n")
     
     self.tsv_out[message_type].append(
-      "%s\n" % "\t".join([str(item) for item in items])
+      "%s\t%s\n" % ("\t".join([str(item) for item in items]), host)
     )
 
 
