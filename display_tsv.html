@@ -85,7 +85,7 @@
         .range([chart_height, 0]);
         
         var color = d3.scale.category10();
-        var colorHost = d3.scale.category20();
+        var colorConn = d3.scale.category20();
         
         var xAxis = d3.svg.axis()
         .scale(x)
@@ -111,7 +111,7 @@
         
         d3.tsv(filename, function(error, data) {
                var lines = d3.keys(data[0])
-               .filter(function(key) { return key !== "num" && key !== "host"; });
+               .filter(function(key) { return key !== "num" && key !== "connection"; });
                color.domain(lines);
                
                var items = color.domain().map(function(name) {
@@ -190,10 +190,10 @@
                .attr("r", 3)
                .attr("cx", function(d) { return x(d.num); })
                .attr("cy", function(d) { return y(Math.max(0, ymin)); })
-               .style("fill", function(d) { return colorHost(d.host); });
+               .style("fill", function(d) { return colorConn(d.connection); });
                
                var legend = svg.selectAll(".legend")
-               .data(colorHost.domain())
+               .data(colorConn.domain())
                .enter().append("g")
                .attr("class", "legend")
                .attr("transform", function(d, i) { return "translate(0," + (i * 10 - 60) + ")"; });
@@ -202,7 +202,7 @@
                .attr("x", width - 118)
                .attr("width", 9)
                .attr("height", 9)
-               .style("fill", colorHost);
+               .style("fill", colorConn);
                
                legend.append("text")
                .attr("x", width - 124)
